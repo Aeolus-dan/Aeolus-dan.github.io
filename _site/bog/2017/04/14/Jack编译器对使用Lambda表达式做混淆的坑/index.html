@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Aeolus|Look The World">
+
+    <title>Jack 编译器对混淆lambda代码的影响 - Aeolus</title>
+
+    <link rel="canonical" href="http://Aeolus-dan.github.io/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+
+    <!-- Icons -->
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+    <!-- Bootstrap Core CSS -->
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/clean-blog.css">
+
+    <!-- Pygments Github CSS -->
+    <link rel="stylesheet" href="/css/syntax.css">
+
+    <!-- Custom Fonts -->
+    <link href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+    <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+
+
+
+
+
+<body ontouchstart="">
+
+    <!-- Navigation -->
+<nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+    <div class="container-fluid">
+        <!-- Brand and toggle get grouped for better mobile display -->
+        <div class="navbar-header page-scroll">
+            <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="/">Aeolus</a>
+        </div>
+
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+            <ul class="nav navbar-nav navbar-right">
+                <li>
+                    <a href="/">Home</a>
+                </li>
+                
+                <li>
+                    <a href="/about/">About</a>
+                </li>
+                
+                <li>
+                    <a href="/archive/">Archive</a>
+                </li>
+                
+                <li>
+                    <a href="/milestone/">milestone</a>
+                </li>
+                
+                <li>
+                    <a href="/tags/">Tags</a>
+                </li>
+                
+            </ul>
+        </div>
+        <!-- /.navbar-collapse -->
+    </div>
+    <!-- /.container -->
+</nav>
+
+
+    <!-- Post Header -->
+<style type="text/css">
+    header.intro-header{
+        background-image: url('/img/facebook.jpg')
+    }
+</style>
+<header class="intro-header" >
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <div class="post-heading">
+                    <div class="Tags">
+                        
+                        <a class="tag" href="/Tags/#Android" title="Android">Android</a>
+                        
+                        <a class="tag" href="/Tags/#Jack" title="Jack">Jack</a>
+                        
+                    </div>
+                    <h1>Jack 编译器对混淆lambda代码的影响</h1>
+                    
+                    <span class="meta">Posted by Aeolus on April 14, 2017</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+
+
+
+<!-- Post Content -->
+<article>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
+
+                <h1 id="section">起因 :</h1>
+<p>Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Minification, Obfuscation, Repackaging, Multidexing, Incremental compilation。它试图取代 javac/dx/proguard/jarjar/multidex 库等工具。</p>
+
+<p><br /><br />
+Android studio从2.2开始支持Java8的部分新特性。也就意味着终于可以用上官方的lambda, 但是问题来了…</p>
+
+<p>在Android studio 中使用Java8, 可以通过如下配置</p>
+<pre><code>
+ android{
+       ...
+        compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+        defaultConfig {
+             ...
+         jackOptions {
+             enabled true
+          }
+      }
+        ...
+ }
+</code></pre>
+
+<p>在一切配置完成后就可以愉快的使用lambda来缩短代码量。</p>
+
+<p>But。。。。。。。</p>
+
+<p>当项目完成时对代码进行混淆时出现了
+    11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
+    11-15 01:46:26.828: W/System.err(21810):    at da.<init>(Unknown Source)
+    11-15 01:46:26.828: W/System.err(21810):    at gc.<init>(Unknown Source)
+    11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
+    11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)</init></init></p>
+
+<hr />
+
+<h1 id="section-1">解决：</h1>
+<ol>
+  <li>看到这个错误是一脸懵逼啊。。<br />没办法决定先查看/build/outputs/mapping/mapping.txt文件下的映射关系
+ com.google.gson.reflect.TypeToken -&gt; da:
+经过一番折腾在网上找到了相关解决方法：<br />
+  在混淆文件中加入对GSON的混淆<br /><br /></li>
+</ol>
+<pre><code>
+    # Gson uses generic type information stored in a class file when working with fields. Proguard<br />
+    # removes such information by default, so configure it to keep all of it.<br />
+    -keepattributes Signature<br />
+
+    # Gson specific classes<br />
+    -keep class sun.misc.Unsafe { *; }<br />
+    #-keep class com.google.gson.stream.** { *; }<br />
+
+    # Application classes that will be serialized/deserialized over Gson<br />
+    -keep class com.google.gson.examples.android.model.** { *; }<br />
+    -keep class com.google.gson.** {*;}<br />
+    -keep class org.json.** {*;}<br />
+    -keepattributes *Annotation*<br />
+    -keep class * implements com.google.gson.TypeAdapterFactory<br />
+    -keep class * implements com.google.gson.JsonSerializer<br />
+    -keep class * implements com.google.gson.JsonDeserializer<br />
+</code></pre>
+
+<p>满心欣喜的以为解决了问题, 可是这只是自己的期盼。 在看到程序崩溃的时候，心情低落到了低谷.</p>
+
+<p>2.灵光一闪,想起之前在官方未支持lambda时,一直使用retrolambda,混淆时没有出现这些问题.这时就想难道是新编译器的问题. 接着找应该保留的类，在这期间，保留了java.lang.invoke包下的所有类，但是都没有解决。不得已只能使用retrolambda了, <br />
+    然后这个问题就被规避了.<br /><br />
+    <strong>记得将enable 设为false。 不然会与retrolambda 冲突. 针对于支持Jack编译器的studio</strong></p>
+
+<ol>
+  <li>使用Jack时还可能在使用<code class="highlighter-rouge">shrinkResources true</code>时出现:<br /></li>
+</ol>
+<pre><code> Error:A problem was found with the configuration of task ':app:packageBaiduRelease'.
+File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\intermediates\res\resources-baidu-release-stripped.ap_' specified for property 'resourceFile' does not exist.</code></pre>
+
+
+
+                <hr>
+
+                <ul class="pager">
+                    
+                    
+                </ul>
+
+                <!-- Duoshuo Share start -->
+                <style>
+                    .ds-share{
+                        text-align: right;
+                    }
+                    
+                    @media only screen and (max-width: 700px) {
+                        .ds-share {
+
+                        }
+                    }
+                </style>
+
+                <div class="ds-share"
+                    data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响"
+                    data-images="http://Aeolus-dan.github.io/img/facebook.jpg"
+                    data-content="起因 :
+Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Mi... | Microdust:Azeril's blog"
+                    data-url="http://Aeolus-dan.github.io/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+                    <div class="ds-share-inline">
+                      <ul  class="ds-share-icons-16">
+
+                        <li data-toggle="ds-share-icons-more"><a class="ds-more" href="#">分享到：</a></li>
+                        <li><a class="ds-wechat flat" href="javascript:void(0);" data-service="wechat">微信</a></li>
+                        <li><a class="ds-weibo flat" href="javascript:void(0);" data-service="weibo">微博</a></li>
+                        <li><a class="ds-douban flat" href="javascript:void(0);" data-service="douban">豆瓣</a></li>
+                      </ul>
+                      <div class="ds-share-icons-more">
+                      </div>
+                    </div>
+                <hr>
+                </div>
+                <!-- Duoshuo Share end-->
+
+
+                <!-- 多说评论框 start -->
+                <div class="comment">
+                    <div class="ds-thread" data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响" data-url="http://Aeolus-dan.github.io/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/"></div>
+                </div>
+                <!-- 多说评论框 end -->
+            </div>
+        </div>
+    </div>
+</article>
+
+
+
+<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"zyuanming"};
+    (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0]
+         || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+</script>
+<!-- 多说公共JS代码 end -->
+
+<!-- async load function -->
+<script>
+    function async(u, c) {
+      var d = document, t = 'script',
+          o = d.createElement(t),
+          s = d.getElementsByTagName(t)[0];
+      o.src = u;
+      if (c) { o.addEventListener('load', function (e) { c(null, e); }, false); }
+      s.parentNode.insertBefore(o, s);
+    }
+</script>
+
+<!-- anchor-js, Doc:http://bryanbraun.github.io/anchorjs/ -->
+<script>
+    async("http://cdn.bootcss.com/anchor-js/1.1.1/anchor.min.js",function(){
+        anchors.options = {
+          visible: 'always',
+          placement: 'right',
+          icon: '#'
+        };
+        anchors.add().remove('.intro-header h1').remove('.subheading');
+    })
+</script>
+<style>
+    /* place left on bigger screen */
+    @media all and (min-width: 800px) {
+        .anchorjs-link{
+            position: absolute;
+            left: -0.75em;
+            font-size: 1.1em;
+            margin-top : -0.1em;
+        }
+    }
+</style>
+
+
+    <!-- Footer -->
+<footer>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1">
+                <ul class="list-inline text-center">
+                    <!-- kill the Facebook and Weibo -->
+                    <li>
+                        <a href="/feed.xml">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-rss fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+
+                    
+                    <li>
+                        <a href="https://github.com/Aeolus-dan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    
+                    <!--
+                    
+                    -->
+
+                    <!--
+                    
+                    -->
+
+                    
+                    <li>
+                        <a target="_blank" href="https://www.zhihu.com/people/Aeolus-dan">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa  fa-stack-1x fa-inverse">知</i>
+                            </span>
+                        </a>
+                    </li>
+                    
+                    <!--
+                    
+                    -->
+
+                </ul>
+                <p class="copyright text-muted">
+                &copy; 2017 路亮亮 ❖ Powered by Jekyll.
+                </p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- jQuery -->
+<script src="/js/jquery.min.js "></script>
+
+<!-- Bootstrap Core JavaScript -->
+<script src="/js/bootstrap.min.js "></script>
+
+<!-- Custom Theme JavaScript -->
+<script src="/js/clean-blog.min.js "></script>
+
+
+
+<!-- Highlight.js -->
+<script>
+    async("http://cdn.bootcss.com/highlight.js/8.6/highlight.min.js",function(){
+        hljs.initHighlightingOnLoad();
+    })
+</script>
+<link href="http://cdn.bootcss.com/highlight.js/8.6/styles/github.min.css" rel="stylesheet">
+
+
+</body>
+
+</html>

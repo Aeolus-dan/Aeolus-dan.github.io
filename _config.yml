@@ -41,7 +41,7 @@ defaults:
   -
     scope: 
       path: ""
-      type: "posts"rouge
+      type: "posts"
     values:
       layout: "post"
       author: "Aeolus"
