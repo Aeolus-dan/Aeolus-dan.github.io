@@ -38,13 +38,14 @@ Android studio从2.2开始支持Java8的部分新特性。也就意味着终于�
 
 But。。。。。。。
 
-当项目完成时对代码进行混淆时出现了
+当项目完成时对代码进行混淆时出现了<br>
+<pre><code>
     11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
     11-15 01:46:26.828: W/System.err(21810):    at da.<init>(Unknown Source)
     11-15 01:46:26.828: W/System.err(21810):    at gc.<init>(Unknown Source)
     11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
     11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)
-
+</code></pre>
 * * *
 
 # 解决：
