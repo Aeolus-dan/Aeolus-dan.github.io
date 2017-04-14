@@ -1,0 +1,64 @@
+# Site settings
+title: Aeolus
+header-img: "img/facebook.jpg"
+tagline: "cn"  
+description: "Aeolus|Look The World"  
+baseurl: ""
+url: "http://Aeolus-dan.github.io"  
+
+# About/contact
+owner: 
+  name: "路亮亮"
+  email: luliang4515@gmail.com
+  bio: ""
+
+# Data
+gavatar: http://dreamofbook.qiniudn.com/Az..png
+favicon: img/favicon.png
+
+douban_username:  
+twitter_username: 
+github_username: Aeolus-dan
+weibo_username: 
+facebook_username:
+zhihu_username: Aeolus-dan
+
+# Build settings  
+# use Github Flavored Markdown !important  
+# document: http://jekyllrb.com/docs/configuration/#kramdown  
+markdown: kramdown
+highlighter: rouge
+permalink: pretty
+paginate: 8
+exclude: ["less","node_modules","Gruntfile.js","package.json","README.md"]
+
+
+# http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+timezone: Asia/Beijing
+
+# Defaults for posts
+defaults:
+  -
+    scope: 
+      path: ""
+      type: "posts"rouge
+    values:
+      layout: "post"
+      author: "Aeolus"
+      header-img: "img/facebook.jpg" # We don't want posts without a header image, that whould mean white on white
+
+# Comments 
+comments :
+  provider : Aeolus
+  duoshuo :
+    short_name : Aeolus-dan
+  disqus :
+      short_name : Aeolus-dan
+
+# Analytics and webmaster tools stuff goes here
+google_analytics: 
+google_verify:
+# https://ssl.bing.com/webmaster/configure/verify/ownership Option 2 content= goes here
+bing_verify:
+
+# Links to include in footer navigation
