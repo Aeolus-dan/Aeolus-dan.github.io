@@ -6,11 +6,11 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Aeolus|Look The World">
+    <meta name="description" content="Hanson|Think Different">
 
-    <title>Jack 编译器对混淆lambda代码的影响 - Aeolus</title>
+    <title>test - Hanson</title>
 
-    <link rel="canonical" href="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+    <link rel="canonical" href="http://localhost:4000/blog/2016/08/07/test/">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -56,7 +56,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="/">Aeolus</a>
+            <a class="navbar-brand" href="/">Hanson</a>
         </div>
 
         <!-- Collect the nav links, forms, and other content for toggling -->
@@ -103,14 +103,12 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#Android" title="Android">Android</a>
-                        
-                        <a class="tag" href="/Tags/#Jack" title="Jack">Jack</a>
+                        <a class="tag" href="/Tags/#swift" title="swift">swift</a>
                         
                     </div>
-                    <h1>Jack 编译器对混淆lambda代码的影响</h1>
+                    <h1>test</h1>
                     
-                    <span class="meta">Posted by Aeolus on April 14, 2017</span>
+                    <span class="meta">Posted by hanson on August 7, 2016</span>
                 </div>
             </div>
         </div>
@@ -126,81 +124,12 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h1 id="起因-">起因 :</h1>
-<p>Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Minification, Obfuscation, Repackaging, Multidexing, Incremental compilation。它试图取代 javac/dx/proguard/jarjar/multidex 库等工具。</p>
+                <p>这是一个测试页面
+<img src="/assets/image/test.png =100" alt="TEST" /></p>
 
-<p><br /><br />
-Android studio从2.2开始支持Java8的部分新特性。也就意味着终于可以用上官方的lambda, 但是问题来了…</p>
+<p>1.使用CoreLocation时，requestAlwaysAuthorization(),因为要获取位置权限，所以在info.plist里要添加NSLocationAlwaysUsageDescription和NSLocationWhenInUseUsageDescription这两个授权提示的描述，不然在debug的时候是进不到delegate实现的方法的。</p>
 
-<p>在Android studio 中使用Java8, 可以通过如下配置</p>
-<pre><code>
- android{
-       ...
-        compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-        defaultConfig {
-             ...
-         jackOptions {
-             enabled true
-          }
-      }
-        ...
- }
-</code></pre>
-
-<p>在一切配置完成后就可以愉快的使用lambda来缩短代码量。</p>
-
-<p>But。。。。。。。</p>
-
-<p>当项目完成时对代码进行混淆时出现了</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code>11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
-11-15 01:46:26.828: W/System.err(21810):    at da.&lt;init&gt;(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at gc.&lt;init&gt;(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)
-</code></pre>
-</div>
-
-<h1 id="解决">解决：</h1>
-<ol>
-  <li>看到这个错误是一脸懵逼啊。。<br />没办法决定先查看/build/outputs/mapping/mapping.txt文件下的映射关系
- com.google.gson.reflect.TypeToken -&gt; da:
-经过一番折腾在网上找到了相关解决方法：<br />
-  在混淆文件中加入对GSON的混淆<br /><br /></li>
-</ol>
-<pre><code>
-    # Gson uses generic type information stored in a class file when working with fields. Proguard<br />
-    # removes such information by default, so configure it to keep all of it.<br />
-    -keepattributes Signature<br />
-
-    # Gson specific classes<br />
-    -keep class sun.misc.Unsafe { *; }<br />
-    #-keep class com.google.gson.stream.** { *; }<br />
-
-    # Application classes that will be serialized/deserialized over Gson<br />
-    -keep class com.google.gson.examples.android.model.** { *; }<br />
-    -keep class com.google.gson.** {*;}<br />
-    -keep class org.json.** {*;}<br />
-    -keepattributes *Annotation*<br />
-    -keep class * implements com.google.gson.TypeAdapterFactory<br />
-    -keep class * implements com.google.gson.JsonSerializer<br />
-    -keep class * implements com.google.gson.JsonDeserializer<br />
-</code></pre>
-
-<p>满心欣喜的以为解决了问题, 可是这只是自己的期盼。 在看到程序崩溃的时候，心情低落到了低谷.</p>
-
-<p>2.灵光一闪,想起之前在官方未支持lambda时,一直使用retrolambda,混淆时没有出现这些问题.这时就想难道是新编译器的问题. 接着找应该保留的类，在这期间，保留了java.lang.invoke包下的所有类，但是都没有解决。不得已只能使用retrolambda了, <br />
-    然后这个问题就被规避了.<br /><br />
-    <strong>记得将enable 设为false。 不然会与retrolambda 冲突. 针对于支持Jack编译器的studio</strong></p>
-
-<ol>
-  <li>使用Jack时还可能在使用<code class="highlighter-rouge">shrinkResources true</code>时出现:<br /></li>
-</ol>
-<pre><code> Error:A problem was found with the configuration of task ':app:packageBaiduRelease'.
-File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\intermediates\res\resources-baidu-release-stripped.ap_' specified for property 'resourceFile' does not exist.</code></pre>
+<p><img src="/assets/image/test.png" alt="替代文本" title="标题文本" width="200" height="100" /></p>
 
 
 
@@ -208,10 +137,10 @@ File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\interme
 
                 <ul class="pager">
                     
-                    
-                    <li class="next">
-                        <a href="/2017/04/24/Can-I-use-this-Intent/" data-toggle="tooltip" data-placement="top" title="Can i use this intent">Next Post &rarr;</a>
+                    <li class="previous">
+                        <a href="/blog/2016/03/23/swift%E5%B0%8F%E9%A1%B9%E7%9B%AE-%E5%9F%BA%E4%BA%8ECoreLoaction%E5%92%8CMapKit%E7%9A%84%E4%BD%8D%E7%BD%AEapp/" data-toggle="tooltip" data-placement="top" title="swift小项目-基于CoreLoaction和MapKit的位置app">&larr; Previous Post</a>
                     </li>
+                    
                     
                 </ul>
 
@@ -229,11 +158,13 @@ File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\interme
                 </style>
 
                 <div class="ds-share"
-                    data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响"
+                    data-thread-key="/blog/2016/08/07/test" data-title="test"
                     data-images="http://localhost:4000/img/facebook.jpg"
-                    data-content="起因 :
-Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Mi... | Microdust:Azeril's blog"
-                    data-url="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+                    data-content="这是一个测试页面
+
+
+1.使用CoreLocation时，requestAlwaysAuthorization(),因为要获取位置权限，所以在info.p... | Microdust:Azeril's blog"
+                    data-url="http://localhost:4000/blog/2016/08/07/test/">
                     <div class="ds-share-inline">
                       <ul  class="ds-share-icons-16">
 
@@ -252,7 +183,7 @@ Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编
 
                 <!-- 多说评论框 start -->
                 <div class="comment">
-                    <div class="ds-thread" data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响" data-url="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/"></div>
+                    <div class="ds-thread" data-thread-key="/blog/2016/08/07/test" data-title="test" data-url="http://localhost:4000/blog/2016/08/07/test/"></div>
                 </div>
                 <!-- 多说评论框 end -->
             </div>
@@ -331,7 +262,7 @@ var duoshuoQuery = {short_name:"zyuanming"};
 
                     
                     <li>
-                        <a href="https://github.com/Aeolus-dan">
+                        <a href="https://github.com/zyphs21">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa fa-github fa-stack-1x fa-inverse"></i>
@@ -350,7 +281,7 @@ var duoshuoQuery = {short_name:"zyuanming"};
 
                     
                     <li>
-                        <a target="_blank" href="https://www.zhihu.com/people/Aeolus-dan">
+                        <a target="_blank" href="https://www.zhihu.com/people/zhang-yi-sen-46">
                             <span class="fa-stack fa-lg">
                                 <i class="fa fa-circle fa-stack-2x"></i>
                                 <i class="fa  fa-stack-1x fa-inverse">知</i>
@@ -360,11 +291,20 @@ var duoshuoQuery = {short_name:"zyuanming"};
                     
                     <!--
                     
+                    <li>
+                        <a target="_blank" href="http://weibo.com/汉森HS">
+                            <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-weibo fa-stack-1x fa-inverse"></i>
+                            </span>
+                        </a>
+                    </li>
+                    
                     -->
 
                 </ul>
                 <p class="copyright text-muted">
-                &copy; 2017 路亮亮 ❖ Powered by Jekyll.
+                &copy; 2017 张远平 ❖ Powered by Jekyll.
                 </p>
             </div>
         </div>
