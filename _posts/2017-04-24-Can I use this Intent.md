@@ -2,12 +2,12 @@
 
 #### Android 提供了强大而有用的(intents), 它不仅可以应用在应用内部，还能用于不同应用之间</br>
 
-</br></br></br>
+<br><br><br>
 
 
 
 
-### 在使用它时可能会出现**ActivityNotFoundException**,这是因为未对系统中是否存在相应的intent接受者做判断. 可以使用以下方法增强代码健壮性:</br>
+### 在使用它时可能会出现**ActivityNotFoundException**,这是因为未对系统中是否存在相应的intent接受者做判断. 可以使用以下方法增强代码健壮性:<br>
     /**
      * Indicates whether the specified action can be used as an intent. This
      * method queries the package manager for installed packages that can
@@ -29,7 +29,7 @@
         return list.size() > 0;
     }
 
-Here is how I use it??</br>
+Here is how I use it??<br>
 <pre><code>
            @Override
            public boolean onPrepareOptionsMenu(Menu menu) {
