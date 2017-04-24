@@ -3,15 +3,70 @@
   <channel>
     <title>Aeolus</title>
     <description>Aeolus|Look The World</description>
-    <link>http://Aeolus-dan.github.io/</link>
-    <atom:link href="http://Aeolus-dan.github.io/feed.xml" rel="self" type="application/rss+xml" />
-    <pubDate>Fri, 14 Apr 2017 09:25:26 +0000</pubDate>
-    <lastBuildDate>Fri, 14 Apr 2017 09:25:26 +0000</lastBuildDate>
-    <generator>Jekyll v3.2.1</generator>
+    <link>http://localhost:4000/</link>
+    <atom:link href="http://localhost:4000/feed.xml" rel="self" type="application/rss+xml" />
+    <pubDate>Mon, 24 Apr 2017 13:36:56 +0000</pubDate>
+    <lastBuildDate>Mon, 24 Apr 2017 13:36:56 +0000</lastBuildDate>
+    <generator>Jekyll v3.4.3</generator>
+    
+      <item>
+        <title>Can i use this intent</title>
+        <description>&lt;h1 id=&quot;can-i-use-this-intent-&quot;&gt;Can I use this Intent ?&lt;/h1&gt;
+
+&lt;h4 id=&quot;android-õintents-übr&quot;&gt;Android ??????????????????????õ????(intents), ????????????????????????,????????????ü?.&amp;lt;/br&amp;gt;&lt;/h4&gt;
+
+&lt;p&gt;&amp;lt;/br&amp;gt;&amp;lt;/br&amp;gt;&amp;lt;/br&amp;gt;&lt;/p&gt;
+
+&lt;h3 id=&quot;activitynotfoundexceptionbr&quot;&gt;??????????????????????????&lt;strong&gt;ActivityNotFoundException&lt;/strong&gt;,???????????????.?????????????´???????????:&amp;lt;/br&amp;gt;&lt;/h3&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;/**
+ * Indicates whether the specified action can be used as an intent. This
+ * method queries the package manager for installed packages that can
+ * respond to an intent with the specified action. If no suitable package is
+ * found, this method returns false.
+ *
+ * @param context The application's environment.
+ * @param action The Intent action to check for availability.
+ *
+ * @return True if an Intent with the specified action can be sent and
+ *         responded to, false otherwise.
+ */
+public static boolean isIntentAvailable(Context context, String action) {
+    final PackageManager packageManager = context.getPackageManager();
+    final Intent intent = new Intent(action);
+    List&amp;lt;ResolveInfo&amp;gt; list =
+            packageManager.queryIntentActivities(intent,
+                    PackageManager.MATCH_DEFAULT_ONLY);
+    return list.size() &amp;gt; 0;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
+
+&lt;p&gt;Here is how I use it??&amp;lt;/br&amp;gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;
+           @Override
+           public boolean onPrepareOptionsMenu(Menu menu) {
+               final boolean scanAvailable = isIntentAvailable(this,
+                   &quot;com.google.zxing.client.android.SCAN&quot;);
+
+               MenuItem item;
+               item = menu.findItem(R.id.menu_item_add);
+               item.setEnabled(scanAvailable);
+
+               return super.onPrepareOptionsMenu(menu);
+           }
+&lt;/code&gt;&lt;/pre&gt;
+
+</description>
+        <pubDate>Mon, 24 Apr 2017 00:00:00 +0000</pubDate>
+        <link>http://localhost:4000/2017/04/24/Can-I-use-this-Intent/</link>
+        <guid isPermaLink="true">http://localhost:4000/2017/04/24/Can-I-use-this-Intent/</guid>
+        
+        
+      </item>
     
       <item>
         <title>Jack 编译器对混淆lambda代码的影响</title>
-        <description>&lt;h1 id=&quot;section&quot;&gt;起因 :&lt;/h1&gt;
+        <description>&lt;h1 id=&quot;起因-&quot;&gt;起因 :&lt;/h1&gt;
 &lt;p&gt;Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Minification, Obfuscation, Repackaging, Multidexing, Incremental compilation。它试图取代 javac/dx/proguard/jarjar/multidex 库等工具。&lt;/p&gt;
 
 &lt;p&gt;&lt;br /&gt;&lt;br /&gt;
@@ -39,16 +94,17 @@ Android studio从2.2开始支持Java8的部分新特性。也就意味着终于�
 
 &lt;p&gt;But。。。。。。。&lt;/p&gt;
 
-&lt;p&gt;当项目完成时对代码进行混淆时出现了
-    11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
-    11-15 01:46:26.828: W/System.err(21810):    at da.&lt;init&gt;(Unknown Source)
-    11-15 01:46:26.828: W/System.err(21810):    at gc.&lt;init&gt;(Unknown Source)
-    11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
-    11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)&lt;/init&gt;&lt;/init&gt;&lt;/p&gt;
+&lt;p&gt;当项目完成时对代码进行混淆时出现了&lt;/p&gt;
 
-&lt;hr /&gt;
+&lt;div class=&quot;highlighter-rouge&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
+11-15 01:46:26.828: W/System.err(21810):    at da.&amp;lt;init&amp;gt;(Unknown Source)
+11-15 01:46:26.828: W/System.err(21810):    at gc.&amp;lt;init&amp;gt;(Unknown Source)
+11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
+11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/div&gt;
 
-&lt;h1 id=&quot;section-1&quot;&gt;解决：&lt;/h1&gt;
+&lt;h1 id=&quot;解决&quot;&gt;解决：&lt;/h1&gt;
 &lt;ol&gt;
   &lt;li&gt;看到这个错误是一脸懵逼啊。。&lt;br /&gt;没办法决定先查看/build/outputs/mapping/mapping.txt文件下的映射关系
  com.google.gson.reflect.TypeToken -&amp;gt; da:
@@ -88,8 +144,8 @@ File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\interme
 
 </description>
         <pubDate>Fri, 14 Apr 2017 00:00:00 +0000</pubDate>
-        <link>http://Aeolus-dan.github.io/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/</link>
-        <guid isPermaLink="true">http://Aeolus-dan.github.io/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/</guid>
+        <link>http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/</link>
+        <guid isPermaLink="true">http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/</guid>
         
         <category>Android</category>
         

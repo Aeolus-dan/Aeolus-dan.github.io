@@ -8,9 +8,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Aeolus|Look The World">
 
-    <title>Jack 编译器对混淆lambda代码的影响 - Aeolus</title>
+    <title>Can i use this intent - Aeolus</title>
 
-    <link rel="canonical" href="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+    <link rel="canonical" href="http://localhost:4000/2017/04/24/Can-I-use-this-Intent/">
 
     <!-- Icons -->
   <link rel="shortcut icon" href="img/favicon.ico">
@@ -103,14 +103,10 @@
                 <div class="post-heading">
                     <div class="Tags">
                         
-                        <a class="tag" href="/Tags/#Android" title="Android">Android</a>
-                        
-                        <a class="tag" href="/Tags/#Jack" title="Jack">Jack</a>
-                        
                     </div>
-                    <h1>Jack 编译器对混淆lambda代码的影响</h1>
+                    <h1>Can i use this intent</h1>
                     
-                    <span class="meta">Posted by Aeolus on April 14, 2017</span>
+                    <span class="meta">Posted by Aeolus on April 24, 2017</span>
                 </div>
             </div>
         </div>
@@ -126,81 +122,50 @@
         <div class="row">
             <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 post-container">
 
-                <h1 id="起因-">起因 :</h1>
-<p>Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Minification, Obfuscation, Repackaging, Multidexing, Incremental compilation。它试图取代 javac/dx/proguard/jarjar/multidex 库等工具。</p>
+                <h1 id="can-i-use-this-intent-">Can I use this Intent ?</h1>
 
-<p><br /><br />
-Android studio从2.2开始支持Java8的部分新特性。也就意味着终于可以用上官方的lambda, 但是问题来了…</p>
+<h4 id="android-õintents-übr">Android ??????????????????????õ????(intents), ????????????????????????,????????????ü?.&lt;/br&gt;</h4>
 
-<p>在Android studio 中使用Java8, 可以通过如下配置</p>
-<pre><code>
- android{
-       ...
-        compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
-        defaultConfig {
-             ...
-         jackOptions {
-             enabled true
-          }
-      }
-        ...
- }
-</code></pre>
+<p>&lt;/br&gt;&lt;/br&gt;&lt;/br&gt;</p>
 
-<p>在一切配置完成后就可以愉快的使用lambda来缩短代码量。</p>
-
-<p>But。。。。。。。</p>
-
-<p>当项目完成时对代码进行混淆时出现了</p>
-
-<div class="highlighter-rouge"><pre class="highlight"><code>11-15 01:46:26.818: W/System.err(21810): java.lang.RuntimeException: Missing type parameter.
-11-15 01:46:26.828: W/System.err(21810):    at da.&lt;init&gt;(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at gc.&lt;init&gt;(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at fx.f(Unknown Source)
-11-15 01:46:26.828: W/System.err(21810):    at com.yourshows.activity.UnwatchedActivity.onResume(Unknown Source)
+<h3 id="activitynotfoundexceptionbr">??????????????????????????<strong>ActivityNotFoundException</strong>,???????????????.?????????????´???????????:&lt;/br&gt;</h3>
+<div class="highlighter-rouge"><pre class="highlight"><code>/**
+ * Indicates whether the specified action can be used as an intent. This
+ * method queries the package manager for installed packages that can
+ * respond to an intent with the specified action. If no suitable package is
+ * found, this method returns false.
+ *
+ * @param context The application's environment.
+ * @param action The Intent action to check for availability.
+ *
+ * @return True if an Intent with the specified action can be sent and
+ *         responded to, false otherwise.
+ */
+public static boolean isIntentAvailable(Context context, String action) {
+    final PackageManager packageManager = context.getPackageManager();
+    final Intent intent = new Intent(action);
+    List&lt;ResolveInfo&gt; list =
+            packageManager.queryIntentActivities(intent,
+                    PackageManager.MATCH_DEFAULT_ONLY);
+    return list.size() &gt; 0;
+}
 </code></pre>
 </div>
 
-<h1 id="解决">解决：</h1>
-<ol>
-  <li>看到这个错误是一脸懵逼啊。。<br />没办法决定先查看/build/outputs/mapping/mapping.txt文件下的映射关系
- com.google.gson.reflect.TypeToken -&gt; da:
-经过一番折腾在网上找到了相关解决方法：<br />
-  在混淆文件中加入对GSON的混淆<br /><br /></li>
-</ol>
+<p>Here is how I use it??&lt;/br&gt;</p>
 <pre><code>
-    # Gson uses generic type information stored in a class file when working with fields. Proguard<br />
-    # removes such information by default, so configure it to keep all of it.<br />
-    -keepattributes Signature<br />
+           @Override
+           public boolean onPrepareOptionsMenu(Menu menu) {
+               final boolean scanAvailable = isIntentAvailable(this,
+                   "com.google.zxing.client.android.SCAN");
 
-    # Gson specific classes<br />
-    -keep class sun.misc.Unsafe { *; }<br />
-    #-keep class com.google.gson.stream.** { *; }<br />
+               MenuItem item;
+               item = menu.findItem(R.id.menu_item_add);
+               item.setEnabled(scanAvailable);
 
-    # Application classes that will be serialized/deserialized over Gson<br />
-    -keep class com.google.gson.examples.android.model.** { *; }<br />
-    -keep class com.google.gson.** {*;}<br />
-    -keep class org.json.** {*;}<br />
-    -keepattributes *Annotation*<br />
-    -keep class * implements com.google.gson.TypeAdapterFactory<br />
-    -keep class * implements com.google.gson.JsonSerializer<br />
-    -keep class * implements com.google.gson.JsonDeserializer<br />
+               return super.onPrepareOptionsMenu(menu);
+           }
 </code></pre>
-
-<p>满心欣喜的以为解决了问题, 可是这只是自己的期盼。 在看到程序崩溃的时候，心情低落到了低谷.</p>
-
-<p>2.灵光一闪,想起之前在官方未支持lambda时,一直使用retrolambda,混淆时没有出现这些问题.这时就想难道是新编译器的问题. 接着找应该保留的类，在这期间，保留了java.lang.invoke包下的所有类，但是都没有解决。不得已只能使用retrolambda了, <br />
-    然后这个问题就被规避了.<br /><br />
-    <strong>记得将enable 设为false。 不然会与retrolambda 冲突. 针对于支持Jack编译器的studio</strong></p>
-
-<ol>
-  <li>使用Jack时还可能在使用<code class="highlighter-rouge">shrinkResources true</code>时出现:<br /></li>
-</ol>
-<pre><code> Error:A problem was found with the configuration of task ':app:packageBaiduRelease'.
-File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\intermediates\res\resources-baidu-release-stripped.ap_' specified for property 'resourceFile' does not exist.</code></pre>
 
 
 
@@ -208,10 +173,10 @@ File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\interme
 
                 <ul class="pager">
                     
-                    
-                    <li class="next">
-                        <a href="/2017/04/24/Can-I-use-this-Intent/" data-toggle="tooltip" data-placement="top" title="Can i use this intent">Next Post &rarr;</a>
+                    <li class="previous">
+                        <a href="/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/" data-toggle="tooltip" data-placement="top" title="Jack 编译器对混淆lambda代码的影响">&larr; Previous Post</a>
                     </li>
+                    
                     
                 </ul>
 
@@ -229,11 +194,12 @@ File 'F:\myjob\github\Android-architecture-todo-mvp-rxjava\MVP\app\build\interme
                 </style>
 
                 <div class="ds-share"
-                    data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响"
+                    data-thread-key="/2017/04/24/Can I use this Intent" data-title="Can i use this intent"
                     data-images="http://localhost:4000/img/facebook.jpg"
-                    data-content="起因 :
-Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编译为 Dalvik 字节码，并负责 Mi... | Microdust:Azeril's blog"
-                    data-url="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/">
+                    data-content="Can I use this Intent ?
+
+Android ??????????????????????õ????(intents), ??????... | Microdust:Azeril's blog"
+                    data-url="http://localhost:4000/2017/04/24/Can-I-use-this-Intent/">
                     <div class="ds-share-inline">
                       <ul  class="ds-share-icons-16">
 
@@ -252,7 +218,7 @@ Jack 是 Java Android Compiler Kit 的缩写，它可以将 Java 代码直接编
 
                 <!-- 多说评论框 start -->
                 <div class="comment">
-                    <div class="ds-thread" data-thread-key="/bog/2017/04/14/Jack编译器对使用Lambda表达式做混淆的坑" data-title="Jack 编译器对混淆lambda代码的影响" data-url="http://localhost:4000/bog/2017/04/14/Jack%E7%BC%96%E8%AF%91%E5%99%A8%E5%AF%B9%E4%BD%BF%E7%94%A8Lambda%E8%A1%A8%E8%BE%BE%E5%BC%8F%E5%81%9A%E6%B7%B7%E6%B7%86%E7%9A%84%E5%9D%91/"></div>
+                    <div class="ds-thread" data-thread-key="/2017/04/24/Can I use this Intent" data-title="Can i use this intent" data-url="http://localhost:4000/2017/04/24/Can-I-use-this-Intent/"></div>
                 </div>
                 <!-- 多说评论框 end -->
             </div>
