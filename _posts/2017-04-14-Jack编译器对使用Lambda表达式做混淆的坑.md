@@ -2,7 +2,7 @@
 layout: post
 title: Jack 编译器对混淆lambda代码的影响
 date: 2017-04-14
-categories: bog
+categories: blog
 tags: [Android,Jack]
 description: Android Jack 编译器
 

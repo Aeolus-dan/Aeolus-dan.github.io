@@ -1,6 +1,15 @@
+---
+layout: post
+title: Can I use this Intent ?
+date: 2017-04-24
+categories: blog
+tags: [Android,Intent]
+description: Android
+
+---
 # Can I use this Intent ?
 
-#### Android 提供了强大而有用的(intents), 它不仅可以应用在应用内部，还能用于不同应用之间</br>
+#### Android 提供了强大而有用的(intents), 它不仅可以应用在应用内部，还能用于不同应用之间<br>
 
 <br><br><br>
 
