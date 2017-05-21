@@ -14,6 +14,8 @@ description: Android androidTestCompile compile gradle
     Error:Conflict with dependency 'com.android.support:support-compat' in project ':app'. Resolved versions for app (25.3.1) and test app (25.2.0) differ. See http://g.co/androidstudio/app-test-app-conflict for details.
     Error:Conflict with dependency 'com.android.support:support-core-utils' in project ':app'. Resolved versions for app (25.3.1) and test app (25.2.0) differ. See http://g.co/androidstudio/app-test-app-conflict for details.
     Error:Conflict with dependency 'com.android.support:support-core-ui' in project ':app'. Resolved versions for app (25.3.1) and test app (25.2.0) differ. See http://g.co/androidstudio/app-test-app-conflict for details.
+    
+
 # 解决：
   分别对compile和androidTestCompile指定版本.
 
