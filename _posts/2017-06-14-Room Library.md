@@ -1,4 +1,4 @@
-# <font color=#88ffb0>Room Persistence Library</font>
+# Room Persistence Library
 
 当使用sqlite全部功能的时候, room在sqlite上提供了一种抽象层以允许流畅的访问数据.
 
